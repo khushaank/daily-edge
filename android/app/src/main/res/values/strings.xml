@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Daily Edge</string>
+    <string name="title_activity_main">Daily Edge</string>
+    <string name="package_name">com.khushaank.dailyedge</string>
+    <string name="custom_url_scheme">com.khushaank.dailyedge</string>
+</resources>
