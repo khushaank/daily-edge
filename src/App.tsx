@@ -45,7 +45,9 @@ import {
   Trash2,
   Camera,
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { TASKS, CATEGORIES } from './constants';
 import { AppState, UserTask, Task, Category } from './types';
@@ -92,10 +94,25 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_STATE;
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'tracker' | 'history' | 'profile'>('dashboard');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('theme');
+    return (saved as 'light' | 'dark') || 'light';
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   // Daily Task Initialization
   useEffect(() => {
@@ -286,6 +303,8 @@ export default function App() {
             <Profile 
               key="profile"
               stats={state.stats}
+              theme={theme}
+              onToggleTheme={toggleTheme}
               onClear={() => {
                 if (window.confirm('Are you sure you want to clear all data?')) {
                   setState(INITIAL_STATE);
@@ -385,55 +404,55 @@ function Dashboard({ todayTask, onComplete, onRegenerate, onSkip, stats, history
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-16"
+      className="space-y-12"
     >
       {/* Reminder Banner */}
       {!todayTask?.completed && !todayTask?.skipped && (
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="p-5 luxury-card flex items-center gap-4 group border-accent/20 bg-accent/5"
+          className="p-4 luxury-card flex items-center gap-4 group border-accent/20 bg-accent/5"
         >
-          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-            <Bell className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+            <Bell className="w-4 h-4" />
           </div>
-          <p className="text-primary font-semibold text-sm italic">Your daily curation is ready for review.</p>
+          <p className="text-primary font-semibold text-xs italic">Your daily curation is ready for review.</p>
         </motion.div>
       )}
 
       {/* Today's Task */}
       <section className="relative">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="px-4 py-1.5 border border-accent text-accent text-[10px] font-bold uppercase tracking-[0.2em] rounded-full">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="px-3 py-1 border border-accent text-accent text-[9px] font-bold uppercase tracking-[0.2em] rounded-full">
             {todayTask?.details.category || 'Daily'}
           </span>
-          <span className="text-on-surface-variant text-[10px] font-bold uppercase tracking-[0.2em]">Priority High</span>
+          <span className="text-on-surface-variant text-[9px] font-bold uppercase tracking-[0.2em]">Priority High</span>
         </div>
 
-        <div className="luxury-card p-10 relative overflow-hidden bg-white">
+        <div className="luxury-card p-8 relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl"></div>
           
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-4 mb-6">
             <motion.div 
               whileHover={{ rotate: 5 }}
-              className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary border border-primary/10"
+              className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary border border-primary/10"
             >
-              <Icon className="w-8 h-8" />
+              <Icon className="w-7 h-7" />
             </motion.div>
           </div>
 
-          <h2 className="text-5xl md:text-6xl leading-tight font-bold tracking-tight mb-8 text-primary">
+          <h2 className="text-4xl md:text-5xl leading-tight font-bold tracking-tight mb-6 text-primary">
             {todayTask?.details.title.split(' ')[0]} <i className="text-accent font-light">{todayTask?.details.title.split(' ').slice(1).join(' ')}</i>
           </h2>
 
-          <div className="flex flex-wrap items-center gap-8 mb-12 text-on-surface-variant">
-            <div className="flex items-center gap-3">
-              <HistoryIcon className="w-5 h-5 text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest">{todayTask?.details.duration}</span>
+          <div className="flex flex-wrap items-center gap-6 mb-10 text-on-surface-variant">
+            <div className="flex items-center gap-2.5">
+              <HistoryIcon className="w-4 h-4 text-accent" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">{todayTask?.details.duration}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Bolt className="w-5 h-5 text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest">+{todayTask?.details.xp} XP</span>
+            <div className="flex items-center gap-2.5">
+              <Bolt className="w-4 h-4 text-accent" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">+{todayTask?.details.xp} XP</span>
             </div>
           </div>
 
@@ -441,38 +460,38 @@ function Dashboard({ todayTask, onComplete, onRegenerate, onSkip, stats, history
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-primary text-white p-8 rounded-xl flex items-center justify-center gap-4 shadow-xl shadow-primary/20"
+              className="bg-primary text-white p-6 rounded-xl flex items-center justify-center gap-4 shadow-xl shadow-primary/20"
             >
-              <CheckCircle2 className="w-8 h-8" />
-              <span className="font-bold text-xl tracking-tight font-headline">Task Completed</span>
+              <CheckCircle2 className="w-6 h-6" />
+              <span className="font-bold text-lg tracking-tight font-headline">Task Completed</span>
             </motion.div>
           ) : todayTask?.skipped ? (
-            <div className="bg-black/5 text-on-surface-variant p-8 rounded-xl flex items-center justify-center gap-4">
-              <XCircle className="w-8 h-8" />
-              <span className="font-bold text-xl tracking-tight font-headline">Task Skipped</span>
+            <div className="bg-on-surface/5 text-on-surface-variant p-6 rounded-xl flex items-center justify-center gap-4">
+              <XCircle className="w-6 h-6" />
+              <span className="font-bold text-lg tracking-tight font-headline">Task Skipped</span>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <motion.button 
                 onClick={onComplete}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-6 bg-primary text-white rounded-xl flex items-center justify-center gap-4 transition-all group relative shadow-2xl shadow-primary/30 hover:bg-primary/90"
+                className="w-full py-4 bg-primary text-white rounded-xl flex items-center justify-center gap-3 transition-all group relative shadow-xl shadow-primary/30 hover:bg-primary/90"
               >
-                <CheckCircle2 className="w-7 h-7" />
-                <span className="font-bold text-xl tracking-tight font-headline">Mark as Done</span>
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="font-bold text-lg tracking-tight font-headline">Mark as Done</span>
               </motion.button>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 <motion.button 
                   onClick={onRegenerate}
                   disabled={todayTask?.regenerated}
                   whileHover={!todayTask?.regenerated ? { backgroundColor: 'rgba(0,0,0,0.02)' } : {}}
                   whileTap={!todayTask?.regenerated ? { scale: 0.95 } : {}}
-                  className="h-16 border border-black/10 rounded-xl flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
+                  className="h-12 border border-on-surface/10 rounded-xl flex items-center justify-center gap-2.5 transition-colors disabled:opacity-50"
                 >
-                  <RefreshCw className={cn("w-5 h-5 text-accent", !todayTask?.regenerated && "group-hover:rotate-180 transition-transform duration-500")} />
-                  <span className="text-on-surface-variant text-[11px] font-bold uppercase tracking-widest">
+                  <RefreshCw className={cn("w-4 h-4 text-accent", !todayTask?.regenerated && "group-hover:rotate-180 transition-transform duration-500")} />
+                  <span className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">
                     {todayTask?.regenerated ? 'Used' : 'Regenerate'}
                   </span>
                 </motion.button>
@@ -480,10 +499,10 @@ function Dashboard({ todayTask, onComplete, onRegenerate, onSkip, stats, history
                   onClick={onSkip}
                   whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
                   whileTap={{ scale: 0.95 }}
-                  className="h-16 border border-black/10 rounded-xl flex items-center justify-center gap-3 transition-colors"
+                  className="h-12 border border-on-surface/10 rounded-xl flex items-center justify-center gap-2.5 transition-colors"
                 >
-                  <SkipForward className="w-5 h-5 text-accent" />
-                  <span className="text-on-surface-variant text-[11px] font-bold uppercase tracking-widest">Skip Task</span>
+                  <SkipForward className="w-4 h-4 text-accent" />
+                  <span className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">Skip Task</span>
                 </motion.button>
               </div>
             </div>
@@ -492,21 +511,21 @@ function Dashboard({ todayTask, onComplete, onRegenerate, onSkip, stats, history
       </section>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <motion.div 
           whileHover={{ y: -4 }}
-          className="md:col-span-3 luxury-card p-8 bg-white"
+          className="md:col-span-3 luxury-card p-6"
         >
-          <div className="flex justify-between items-end mb-8">
+          <div className="flex justify-between items-end mb-6">
             <div>
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-1">Weekly Performance</h3>
-              <p className="text-2xl font-bold text-primary">Consistency Index</p>
+              <h3 className="text-[9px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-1">Weekly Performance</h3>
+              <p className="text-xl font-bold text-primary">Consistency Index</p>
             </div>
-            <span className="text-accent font-black text-4xl tracking-tighter italic">
+            <span className="text-accent font-black text-3xl tracking-tighter italic">
               {Math.round((weeklyProgress.filter(h => h === 100).length / 7) * 100)}%
             </span>
           </div>
-          <div className="flex justify-between items-end gap-3 h-32">
+          <div className="flex justify-between items-end gap-2 h-24">
             {weeklyProgress.map((h, i) => (
               <motion.div 
                 key={i} 
@@ -514,56 +533,56 @@ function Dashboard({ todayTask, onComplete, onRegenerate, onSkip, stats, history
                 animate={{ height: `${h}%` }}
                 transition={{ delay: i * 0.1, duration: 0.8, ease: 'easeOut' }}
                 className={cn(
-                  "w-full rounded-lg transition-all duration-700",
-                  h === 100 ? "bg-primary shadow-lg shadow-primary/10" : "bg-black/5"
+                  "w-full rounded-md transition-all duration-700",
+                  h === 100 ? "bg-primary shadow-lg shadow-primary/10" : "bg-on-surface/5"
                 )}
               />
             ))}
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="luxury-card p-8 flex flex-col justify-between h-48 bg-white">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">Focus</h3>
+        <motion.div whileHover={{ y: -4 }} className="luxury-card p-6 flex flex-col justify-between h-40">
+          <h3 className="text-[9px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">Focus</h3>
           <div className="flex flex-col">
-            <span className="text-primary font-bold text-4xl tracking-tight font-headline">MIND</span>
-            <span className="text-accent text-[10px] uppercase font-bold tracking-widest mt-2">Next: 8PM</span>
+            <span className="text-primary font-bold text-3xl tracking-tight font-headline">MIND</span>
+            <span className="text-accent text-[9px] uppercase font-bold tracking-widest mt-1.5">Next: 8PM</span>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="luxury-card p-8 flex flex-col justify-between h-48 overflow-hidden relative bg-white">
+        <motion.div whileHover={{ y: -4 }} className="luxury-card p-6 flex flex-col justify-between h-40 overflow-hidden relative">
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl"></div>
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">Intensity</h3>
+          <h3 className="text-[9px] font-bold uppercase tracking-[0.3em] text-on-surface-variant">Intensity</h3>
           <div className="flex flex-col">
-            <span className="text-primary font-bold text-4xl tracking-tight font-headline">ELITE</span>
-            <span className="text-accent text-[10px] uppercase font-bold tracking-widest mt-2">Top 5%</span>
+            <span className="text-primary font-bold text-3xl tracking-tight font-headline">ELITE</span>
+            <span className="text-accent text-[9px] uppercase font-bold tracking-widest mt-1.5">Top 5%</span>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="luxury-card p-8 flex flex-col justify-between h-48 bg-primary text-white">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/60">Streak</h3>
+        <motion.div whileHover={{ y: -4 }} className="luxury-card p-6 flex flex-col justify-between h-40 bg-primary text-white">
+          <h3 className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/60">Streak</h3>
           <div className="flex flex-col">
-            <span className="font-bold text-5xl tracking-tighter font-headline">{stats.currentStreak}</span>
-            <span className="text-white/80 text-[10px] uppercase font-bold tracking-widest mt-2">Days of Focus</span>
+            <span className="font-bold text-4xl tracking-tighter font-headline">{stats.currentStreak}</span>
+            <span className="text-white/80 text-[9px] uppercase font-bold tracking-widest mt-1.5">Days of Focus</span>
           </div>
         </motion.div>
       </div>
 
       {/* Inspiration */}
-      <div className="relative rounded-xl overflow-hidden h-64 group border border-black/5">
+      <div className="relative rounded-xl overflow-hidden h-56 group border border-on-surface/5">
         <img 
           src="https://picsum.photos/seed/luxury/1200/600" 
           alt="Inspiration" 
           className="w-full h-full object-cover grayscale opacity-60 group-hover:scale-105 transition-transform duration-1000"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent"></div>
-        <div className="absolute bottom-10 left-10 right-10">
-          <p className="text-primary font-headline italic font-medium tracking-tight text-3xl leading-tight max-w-md">
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent"></div>
+        <div className="absolute bottom-8 left-8 right-8">
+          <p className="text-primary font-headline italic font-medium tracking-tight text-2xl leading-tight max-w-md">
             "The edge is where you find yourself."
           </p>
-          <div className="flex items-center gap-4 mt-6">
-            <div className="h-px w-12 bg-accent"></div>
-            <p className="text-accent text-[11px] font-bold uppercase tracking-[0.3em]">Daily Mantra</p>
+          <div className="flex items-center gap-4 mt-4">
+            <div className="h-px w-10 bg-accent"></div>
+            <p className="text-accent text-[10px] font-bold uppercase tracking-[0.3em]">Daily Mantra</p>
           </div>
         </div>
       </div>
@@ -598,67 +617,67 @@ function Tracker({ history, stats }: any) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-16"
+      className="space-y-12"
     >
       <section>
-        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent font-headline">Monthly Performance</span>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-primary leading-tight mt-4">
+        <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-accent font-headline">Monthly Performance</span>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary leading-tight mt-4">
           The Kinetic <br/><i className="text-accent font-light">Edge</i>
         </h1>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div whileHover={{ y: -4 }} className="luxury-card p-8 bg-white">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-2">This Month</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <motion.div whileHover={{ y: -4 }} className="luxury-card p-6">
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-2">This Month</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-bold font-headline text-primary">{stats.totalCompleted}</span>
-            <span className="text-on-surface-variant font-headline font-medium text-xl">/ {daysInMonth}</span>
+            <span className="text-4xl font-bold font-headline text-primary">{stats.totalCompleted}</span>
+            <span className="text-on-surface-variant font-headline font-medium text-lg">/ {daysInMonth}</span>
           </div>
-          <p className="text-xs text-on-surface-variant mt-2 font-medium italic">Days Completed</p>
+          <p className="text-[10px] text-on-surface-variant mt-1.5 font-medium italic">Days Completed</p>
         </motion.div>
-        <motion.div whileHover={{ y: -4 }} className="luxury-card p-8 bg-white">
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-2">Best Streak</p>
+        <motion.div whileHover={{ y: -4 }} className="luxury-card p-6">
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-on-surface-variant mb-2">Best Streak</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-bold font-headline text-accent">{stats.longestStreak}</span>
-            <span className="text-on-surface-variant font-headline font-medium text-[10px] uppercase tracking-[0.2em]">DAYS</span>
+            <span className="text-4xl font-bold font-headline text-accent">{stats.longestStreak}</span>
+            <span className="text-on-surface-variant font-headline font-medium text-[9px] uppercase tracking-[0.2em]">DAYS</span>
           </div>
-          <p className="text-xs text-on-surface-variant mt-2 font-medium italic">All Time Record</p>
+          <p className="text-[10px] text-on-surface-variant mt-1.5 font-medium italic">All Time Record</p>
         </motion.div>
       </div>
 
-      <section className="luxury-card p-10 bg-white">
-        <div className="flex justify-between items-center mb-10">
+      <section className="luxury-card p-8">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-primary font-headline">{monthName} {year}</h2>
-            <p className="text-xs text-on-surface-variant font-medium mt-1 italic">82% Discipline achieved</p>
+            <h2 className="text-xl font-bold tracking-tight text-primary font-headline">{monthName} {year}</h2>
+            <p className="text-[10px] text-on-surface-variant font-medium mt-1 italic">82% Discipline achieved</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <motion.button 
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
-              className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black/5 transition-colors"
+              className="w-9 h-9 rounded-full border border-on-surface/10 flex items-center justify-center hover:bg-on-surface/5 transition-colors"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </motion.button>
             <motion.button 
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
-              className="w-10 h-10 rounded-full border border-black/10 flex items-center justify-center hover:bg-black/5 transition-colors"
+              className="w-9 h-9 rounded-full border border-on-surface/10 flex items-center justify-center hover:bg-on-surface/5 transition-colors"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </motion.button>
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 mb-6">
+        <div className="grid grid-cols-7 gap-1 mb-4">
           {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => (
-            <span key={d} className="text-center text-[10px] font-bold uppercase text-on-surface-variant/40 tracking-[0.3em]">{d}</span>
+            <span key={d} className="text-center text-[9px] font-bold uppercase text-on-surface-variant/40 tracking-[0.3em]">{d}</span>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-y-6 gap-x-2 justify-items-center">
+        <div className="grid grid-cols-7 gap-y-4 gap-x-1 justify-items-center">
           {Array.from({ length: firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1 }).map((_, i) => (
-            <div key={`empty-${i}`} className="w-10 h-10" />
+            <div key={`empty-${i}`} className="w-9 h-9" />
           ))}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
@@ -670,33 +689,33 @@ function Tracker({ history, stats }: any) {
                 key={day} 
                 whileHover={{ scale: 1.1 }}
                 className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center relative transition-all cursor-default",
+                  "w-9 h-9 rounded-full flex items-center justify-center relative transition-all cursor-default",
                   status === 'completed' && "bg-primary/10 text-primary",
                   status === 'missed' && "bg-red-500/10 text-red-500",
                   status === 'future' && "text-on-surface-variant/20",
                   status === 'pending' && "text-on-surface-variant",
-                  isToday && "ring-2 ring-accent ring-offset-4 ring-offset-white"
+                  isToday && "ring-2 ring-accent ring-offset-2 ring-offset-surface"
                 )}
               >
-                <span className="text-sm font-bold">{day.toString().padStart(2, '0')}</span>
-                {status === 'completed' && <div className="absolute -bottom-2 w-1 h-1 bg-primary rounded-full" />}
-                {status === 'missed' && <div className="absolute -bottom-2 w-1 h-1 bg-red-500 rounded-full" />}
+                <span className="text-xs font-bold">{day.toString().padStart(2, '0')}</span>
+                {status === 'completed' && <div className="absolute -bottom-1 w-1 h-1 bg-primary rounded-full" />}
+                {status === 'missed' && <div className="absolute -bottom-1 w-1 h-1 bg-red-500 rounded-full" />}
               </motion.div>
             );
           })}
         </div>
       </section>
 
-      <motion.div whileHover={{ y: -4 }} className="luxury-card p-8 flex items-center gap-8 bg-white">
-        <div className="w-20 h-20 rounded-full border-[4px] border-primary/10 flex items-center justify-center relative">
+      <motion.div whileHover={{ y: -4 }} className="luxury-card p-6 flex items-center gap-6">
+        <div className="w-16 h-16 rounded-full border-[3px] border-primary/10 flex items-center justify-center relative">
           <svg className="w-full h-full -rotate-90">
-            <circle className="text-primary" cx="40" cy="40" fill="none" r="36" stroke="currentColor" strokeDasharray="226" strokeDashoffset="40" strokeLinecap="round" strokeWidth="6"></circle>
+            <circle className="text-primary" cx="32" cy="32" fill="none" r="28" stroke="currentColor" strokeDasharray="176" strokeDashoffset="32" strokeLinecap="round" strokeWidth="5"></circle>
           </svg>
-          <span className="absolute text-sm font-bold font-headline">82%</span>
+          <span className="absolute text-xs font-bold font-headline">82%</span>
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-bold tracking-tight font-headline mb-1 text-primary">Consistency Score</h3>
-          <p className="text-sm text-on-surface-variant leading-relaxed italic">Top 5% performer this month. Outstanding work.</p>
+          <h3 className="text-base font-bold tracking-tight font-headline mb-0.5 text-primary">Consistency Score</h3>
+          <p className="text-[11px] text-on-surface-variant leading-relaxed italic">Top 5% performer this month. Outstanding work.</p>
         </div>
       </motion.div>
     </motion.div>
@@ -721,24 +740,24 @@ function HistoryView({ history }: any) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className="space-y-12"
+      className="space-y-10"
     >
       <section>
-        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent font-headline">Archival Records</span>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-primary leading-tight mt-4">
+        <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-accent font-headline">Archival Records</span>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary leading-tight mt-4">
           The Legacy <br/><i className="text-accent font-light">Vault</i>
         </h1>
       </section>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
           <input 
             type="text" 
             placeholder="Search records..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-14 pl-12 pr-6 luxury-card bg-white focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all font-medium text-sm"
+            className="w-full h-12 pl-12 pr-6 luxury-card focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all font-medium text-xs"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
@@ -748,10 +767,10 @@ function HistoryView({ history }: any) {
               whileTap={{ scale: 0.95 }}
               onClick={() => setFilter(cat as any)}
               className={cn(
-                "px-6 h-14 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all whitespace-nowrap border",
+                "px-5 h-12 rounded-xl font-bold text-[9px] uppercase tracking-widest transition-all whitespace-nowrap border",
                 filter === cat 
                   ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                  : "bg-white text-on-surface-variant border-black/5 hover:bg-black/5"
+                  : "bg-surface text-on-surface-variant border-on-surface/5 hover:bg-on-surface/5"
               )}
             >
               {cat}
@@ -760,7 +779,7 @@ function HistoryView({ history }: any) {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <AnimatePresence mode="popLayout">
           {filteredHistory.length > 0 ? (
             filteredHistory.map((h: any) => {
@@ -774,25 +793,25 @@ function HistoryView({ history }: any) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   whileHover={{ x: 4 }}
-                  className="luxury-card p-6 flex items-center gap-6 group hover:border-accent/30 transition-all bg-white"
+                  className="luxury-card p-5 flex items-center gap-5 group hover:border-accent/30 transition-all"
                 >
                   <div className={cn(
-                    "w-14 h-14 rounded-xl flex items-center justify-center shrink-0 border",
+                    "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border",
                     h.completed ? "bg-primary/5 text-primary border-primary/10" : "bg-red-500/5 text-red-500 border-red-500/10"
                   )}>
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-accent">{task.category}</span>
-                      <span className="text-[10px] text-on-surface-variant/40">•</span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">{formatDate(h.date)}</span>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-accent">{task.category}</span>
+                      <span className="text-[9px] text-on-surface-variant/40">•</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{formatDate(h.date)}</span>
                     </div>
-                    <h3 className="text-lg font-bold text-primary truncate font-headline tracking-tight">{task.title}</h3>
+                    <h3 className="text-base font-bold text-primary truncate font-headline tracking-tight">{task.title}</h3>
                   </div>
                   <div className="text-right hidden sm:block">
-                    <p className="text-xs font-bold text-primary">+{task.xp} XP</p>
-                    <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest mt-1">{task.duration}</p>
+                    <p className="text-[10px] font-bold text-primary">+{task.xp} XP</p>
+                    <p className="text-[9px] text-on-surface-variant uppercase font-bold tracking-widest mt-0.5">{task.duration}</p>
                   </div>
                 </motion.div>
               );
@@ -801,13 +820,13 @@ function HistoryView({ history }: any) {
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="luxury-card p-20 flex flex-col items-center justify-center text-center bg-white"
+              className="luxury-card p-16 flex flex-col items-center justify-center text-center"
             >
-              <div className="w-20 h-20 rounded-full bg-black/5 flex items-center justify-center text-on-surface-variant mb-6">
-                <HistoryIcon className="w-10 h-10" />
+              <div className="w-16 h-16 rounded-full bg-on-surface/5 flex items-center justify-center text-on-surface-variant mb-4">
+                <HistoryIcon className="w-8 h-8 opacity-20" />
               </div>
-              <h3 className="text-2xl font-bold text-primary font-headline">No records found</h3>
-              <p className="text-on-surface-variant mt-2 max-w-xs mx-auto text-sm italic">Your legacy is waiting to be written. Complete your first task today.</p>
+              <h3 className="text-xl font-bold text-primary font-headline">No records found</h3>
+              <p className="text-on-surface-variant mt-1.5 max-w-xs mx-auto text-xs italic">Your legacy is waiting to be written. Complete your first task today.</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -816,17 +835,17 @@ function HistoryView({ history }: any) {
   );
 }
 
-function Profile({ stats, onClear }: any) {
+function Profile({ stats, onClear, theme, onToggleTheme }: any) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-16"
+      className="space-y-12"
     >
       <section className="text-center">
-        <div className="relative inline-block mb-8">
-          <div className="w-28 h-28 rounded-full border border-black/5 p-1.5 bg-white shadow-sm">
+        <div className="relative inline-block mb-6">
+          <div className="w-24 h-24 rounded-full border border-on-surface/5 p-1 bg-surface shadow-sm">
             <img 
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
               alt="Avatar" 
@@ -838,65 +857,95 @@ function Profile({ stats, onClear }: any) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3, type: 'spring' }}
-            className="absolute -bottom-1 -right-1 w-9 h-9 bg-accent text-white rounded-full flex items-center justify-center border-4 border-white shadow-lg"
+            className="absolute -bottom-1 -right-1 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center border-4 border-surface shadow-lg"
           >
-            <Trophy className="w-4 h-4" />
+            <Trophy className="w-3 h-3" />
           </motion.div>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-primary font-headline">The Curator</h1>
-        <p className="text-accent text-[11px] font-bold uppercase tracking-[0.3em] mt-2 italic">Elite Status • Level 42</p>
+        <h1 className="text-3xl font-bold tracking-tight text-primary font-headline">The Curator</h1>
+        <p className="text-accent text-[10px] font-bold uppercase tracking-[0.3em] mt-2 italic">Elite Status • Level 42</p>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard label="Total Tasks" value={stats.totalCompleted} sub="Completed" />
         <StatCard label="Longest Streak" value={stats.longestStreak} sub="Days of Focus" color="text-accent" />
         <StatCard label="Current Streak" value={stats.currentStreak} sub="Active Momentum" color="text-primary" />
       </div>
 
-      <section className="space-y-6">
-        <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-2">Notifications</h3>
-        <div className="luxury-card overflow-hidden bg-white">
+      <section className="space-y-4">
+        <h3 className="text-[9px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-2">Appearance</h3>
+        <div className="luxury-card overflow-hidden">
+          <motion.button 
+            onClick={onToggleTheme}
+            whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
+            className="w-full flex items-center justify-between p-5 transition-all group text-left"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              </div>
+              <div>
+                <span className="font-bold text-primary font-headline text-base block">Dark Mode</span>
+                <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">{theme === 'light' ? 'Off' : 'On'}</span>
+              </div>
+            </div>
+            <div className={cn(
+              "w-10 h-5 rounded-full relative flex items-center px-1 transition-all duration-500",
+              theme === 'dark' ? "bg-primary" : "bg-on-surface/10"
+            )}>
+              <motion.div 
+                animate={{ x: theme === 'dark' ? 20 : 0 }}
+                className="w-3 h-3 bg-white rounded-full shadow-sm"
+              />
+            </div>
+          </motion.button>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h3 className="text-[9px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-2">Notifications</h3>
+        <div className="luxury-card overflow-hidden">
           <ToggleItem icon={<Bell />} title="Daily Reminder" sub="System check-in at 8:00 AM" active={true} />
           <ToggleItem icon={<AlertTriangle />} title="Streak at Risk" sub="Alert when focus session is missing" active={true} />
         </div>
       </section>
 
-      <section className="space-y-6">
-        <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.3em] px-2">Data & Privacy</h3>
-        <div className="luxury-card overflow-hidden bg-white">
+      <section className="space-y-4">
+        <h3 className="text-[9px] font-bold text-on-surface-variant uppercase tracking-[0.3em] px-2">Data & Privacy</h3>
+        <div className="luxury-card overflow-hidden">
           <motion.button 
             whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
-            className="w-full flex items-center justify-between p-6 transition-all group border-b border-black/5 text-left"
+            className="w-full flex items-center justify-between p-5 transition-all group border-b border-on-surface/5 text-left"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                <Download className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                <Download className="w-4 h-4" />
               </div>
-              <span className="font-bold text-primary font-headline text-lg">Export Performance Data</span>
+              <span className="font-bold text-primary font-headline text-base">Export Data</span>
             </div>
-            <ChevronRight className="text-on-surface-variant group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="text-on-surface-variant group-hover:translate-x-1 transition-transform w-4 h-4" />
           </motion.button>
           <motion.button 
             onClick={onClear}
             whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.05)' }}
-            className="w-full flex items-center justify-between p-6 transition-all group text-left"
+            className="w-full flex items-center justify-between p-5 transition-all group text-left"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                <Trash2 className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                <Trash2 className="w-4 h-4" />
               </div>
-              <span className="font-bold text-red-500 font-headline text-lg">Clear Local Storage</span>
+              <span className="font-bold text-red-500 font-headline text-base">Clear Storage</span>
             </div>
-            <ChevronRight className="text-on-surface-variant group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="text-on-surface-variant group-hover:translate-x-1 transition-transform w-4 h-4" />
           </motion.button>
         </div>
       </section>
 
-      <footer className="pt-12 pb-8 text-center">
-        <p className="font-headline text-2xl font-bold tracking-tight text-primary/20 italic leading-tight max-w-sm mx-auto">
+      <footer className="pt-8 pb-4 text-center">
+        <p className="font-headline text-xl font-bold tracking-tight text-primary/20 italic leading-tight max-w-xs mx-auto">
           'One small win a day leads to massive growth.'
         </p>
-        <p className="text-[10px] text-on-surface-variant/30 font-bold uppercase tracking-[0.4em] mt-8">Daily Edge v2.0 • Established 2026</p>
+        <p className="text-[9px] text-on-surface-variant/30 font-bold uppercase tracking-[0.4em] mt-6">Daily Edge v2.1</p>
       </footer>
     </motion.div>
   );
@@ -904,11 +953,11 @@ function Profile({ stats, onClear }: any) {
 
 function StatCard({ label, value, sub, color = "text-primary" }: any) {
   return (
-    <div className="luxury-card p-8 flex flex-col justify-between h-48 bg-white">
-      <span className="text-on-surface-variant text-[11px] font-bold uppercase tracking-widest">{label}</span>
-      <div className="space-y-1">
-        <span className={cn("font-headline font-bold text-5xl tracking-tighter block", color)}>{value}</span>
-        <span className="text-on-surface-variant text-xs font-medium italic">{sub}</span>
+    <div className="luxury-card p-6 flex flex-col justify-between h-40">
+      <span className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{label}</span>
+      <div className="space-y-0.5">
+        <span className={cn("font-headline font-bold text-4xl tracking-tighter block", color)}>{value}</span>
+        <span className="text-on-surface-variant text-[10px] font-medium italic">{sub}</span>
       </div>
     </div>
   );
@@ -916,23 +965,23 @@ function StatCard({ label, value, sub, color = "text-primary" }: any) {
 
 function ToggleItem({ icon, title, sub, active }: any) {
   return (
-    <div className="flex items-center justify-between p-6 border-b border-black/5 last:border-0">
+    <div className="flex items-center justify-between p-5 border-b border-on-surface/5 last:border-0">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-          {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5" })}
+        <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+          {React.cloneElement(icon as React.ReactElement, { className: "w-4 h-4" })}
         </div>
         <div>
-          <span className="font-bold text-primary font-headline text-lg block">{title}</span>
-          <span className="text-xs text-on-surface-variant">{sub}</span>
+          <span className="font-bold text-primary font-headline text-base block">{title}</span>
+          <span className="text-[10px] text-on-surface-variant">{sub}</span>
         </div>
       </div>
       <div className={cn(
-        "w-12 h-6 rounded-full relative flex items-center px-1 transition-all duration-500",
-        active ? "bg-primary" : "bg-black/10"
+        "w-10 h-5 rounded-full relative flex items-center px-1 transition-all duration-500",
+        active ? "bg-primary" : "bg-on-surface/10"
       )}>
         <div className={cn(
-          "w-4 h-4 bg-white rounded-full shadow-md transition-all duration-500",
-          active ? "translate-x-6" : "translate-x-0"
+          "w-3 h-3 bg-white rounded-full shadow-md transition-all duration-500",
+          active ? "translate-x-5" : "translate-x-0"
         )} />
       </div>
     </div>

@@ -2,27 +2,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1b263b;
-  --color-primary-container: #e0e1dd;
-  --color-on-primary-container: #0d1b2a;
-  --color-accent: #c5a059;
-  --color-surface: #ffffff;
-  --color-surface-bright: #fdfcf8;
-  --color-surface-container: rgba(255, 255, 255, 0.8);
-  --color-on-surface: #1a1a1a;
-  --color-on-surface-variant: #777777;
-  --color-outline: #e5e5e5;
-  --color-background: #fdfcf8;
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-background: var(--background);
   
   --font-headline: "Cormorant Garamond", serif;
   --font-body: "Inter", sans-serif;
 }
 
+:root {
+  --primary: #1b263b;
+  --accent: #c5a059;
+  --surface: #ffffff;
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #777777;
+  --background: #fdfcf8;
+}
+
+.dark {
+  --primary: #e0e1dd;
+  --accent: #c5a059;
+  --surface: #1b263b;
+  --on-surface: #fdfcf8;
+  --on-surface-variant: #a0a0a0;
+  --background: #0d1b2a;
+}
+
 @layer base {
   body {
-    @apply bg-background text-on-surface font-body antialiased;
-    background-color: #fdfcf8;
+    @apply bg-background text-on-surface font-body antialiased transition-colors duration-500;
     min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Global Scrollbar Removal */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -32,19 +54,19 @@
 
 @layer components {
   .luxury-card {
-    @apply bg-white border border-black/5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl;
+    @apply bg-surface border border-on-surface/5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-xl transition-all duration-300;
   }
 
   .luxury-glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-sm;
+    @apply bg-surface/70 backdrop-blur-xl border border-on-surface/10 shadow-sm;
   }
 
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 }
 
